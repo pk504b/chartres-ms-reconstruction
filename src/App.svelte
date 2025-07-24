@@ -24,14 +24,17 @@
 
   // Initialize OpenSeadragon viewer and load manifest
   onMount(async () => {
-    const res = await fetch("/1029.json");
+    const res = await fetch("/mss-enlumines.json");
     manifest = await res.json();
     ms_label = manifest.label.en[0];
 
     const tileSources = manifest.items.map((canvas) => ({
-      tileSource: canvas.items[0].items[0].body.service[0].id + "/info.json",
+      // tileSource: canvas.items[0].items[0].body.service[0].id + "/info.json",
+      tileSource: {
+        type: "image",
+        url: canvas.items[0].items[0].body.id
+      },
     }));
-
     // const tileSources = manifest.items[22].items[0].items[0].body.service[0].id + "/info.json"
 
     viewer = OpenSeadragon({
@@ -51,13 +54,23 @@
     // Reset States
     transformableFrags = [];
     canvas_label = "";
-    // hideBg = false
+    // hideBg = false    
 
-    const frag0_id = viewer.world.getItemAt(0).source["@id"];
+    const frag0_id = viewer.world.getItemAt(0).source?.url;
     const canvas = manifest.items.find((c) =>
       c.items[0].items[0].body.id.includes(frag0_id),
     );
     canvas_label = canvas?.label.none[0] as string;
+
+    // // CROPPING
+    // const frag0_imgUrl = canvas?.items[0].items[0].body.id;
+    // const frag0_imgRegion = frag0_imgUrl?.split("/")[11]
+    // if (frag0_imgRegion !== "full") {
+    //   // console.log(frag0_imgRegion);
+    //   const rect = new OpenSeadragon.Rect(Number(frag0_imgRegion.split(",")[0]), Number(frag0_imgRegion.split(",")[1]), Number(frag0_imgRegion.split(",")[2]), Number(frag0_imgRegion.split(",")[3]));
+    //   viewer.world.getItemAt(0).setClip(rect);
+    //   // viewer.viewport.fitBounds(rect, true);
+    // }
 
     const otherFrags = canvas?.items[0].items.filter(
       (f) => f.body.service[0].id !== frag0_id,
@@ -137,7 +150,7 @@
     if (!osd) return;
 
     if (hide) {
-      const frag0_id = osd.source["@id"];
+      const frag0_id = osd.source.url;
       const canvas = manifest.items.find((c) =>
         c.items[0].items[0].body.id.includes(frag0_id),
       );
