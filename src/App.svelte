@@ -4,7 +4,7 @@
   import type { Viewer } from "openseadragon";
   import type { IIIFManifest } from "./types";
 
-  // Type definitions
+  // TYPE DEFINITIONS
   interface Fragment {
     id: string;
     osd: OpenSeadragon.TiledImage;
@@ -14,7 +14,7 @@
     r: number;
   }
 
-  // State
+  // STATE
   let transformableFrags = $state<Fragment[]>([]);
   let viewer: Viewer;
   let manifest: IIIFManifest;
@@ -22,14 +22,13 @@
   let canvas_label = $state("");
   let hideBg = $state(false);
 
-  // Initialize OpenSeadragon viewer and load manifest
+  // INITIALIZE OSD AND LOAD MANIFEST
   onMount(async () => {
-    const res = await fetch("/mss-enlumines.json");
+    const res = await fetch("/1029.json");
     manifest = await res.json();
     ms_label = manifest.label.en[0];
 
     const tileSources = manifest.items.map((canvas) => ({
-      // tileSource: canvas.items[0].items[0].body.service[0].id + "/info.json",
       tileSource: {
         type: "image",
         url: canvas.items[0].items[0].body.id
@@ -49,31 +48,21 @@
     viewer.addHandler("open", onOpenViewer);
   });
 
-  // Handle viewer open event
+  // HANDLE VIEWER OPEN EVENT
   function onOpenViewer(e: OpenSeadragon.ViewerEvent) {
-    // Reset States
+    // RESET STATES
     transformableFrags = [];
     canvas_label = "";
-    // hideBg = false    
-
-    const frag0_id = viewer.world.getItemAt(0).source?.url;
+    // hideBg = false 
+    
+    const frag0_id = viewer.world.getItemAt(0)?.source.url;
     const canvas = manifest.items.find((c) =>
-      c.items[0].items[0].body.id.includes(frag0_id),
+      c.items[0].items[0].body.id === frag0_id,
     );
     canvas_label = canvas?.label.none[0] as string;
-
-    // // CROPPING
-    // const frag0_imgUrl = canvas?.items[0].items[0].body.id;
-    // const frag0_imgRegion = frag0_imgUrl?.split("/")[11]
-    // if (frag0_imgRegion !== "full") {
-    //   // console.log(frag0_imgRegion);
-    //   const rect = new OpenSeadragon.Rect(Number(frag0_imgRegion.split(",")[0]), Number(frag0_imgRegion.split(",")[1]), Number(frag0_imgRegion.split(",")[2]), Number(frag0_imgRegion.split(",")[3]));
-    //   viewer.world.getItemAt(0).setClip(rect);
-    //   // viewer.viewport.fitBounds(rect, true);
-    // }
-
+    
     const otherFrags = canvas?.items[0].items.filter(
-      (f) => f.body.service[0].id !== frag0_id,
+      (f) => f.body.id !== frag0_id,
     );
     if (!otherFrags) return;
 
@@ -103,10 +92,10 @@
         },
       });
     });
-    toggleBg(hideBg);
+    toggleBg(hideBg);  // PERSISTS toggleBg STATE
   }
 
-  // Transform a fragment's position and rotation
+  // TRANSFORM FRAGMENT'S POSITION AND ROTATION
   function transformFragment(
     fragment: OpenSeadragon.TiledImage,
     x: number,
@@ -117,7 +106,7 @@
     fragment.setRotation(r);
   }
 
-  // Extract polygon points from SVG string
+  // EXTRACT POLYGON POINTS FROM SVG STRING
   function extractPolygonPoints(svgString: string): OpenSeadragon.Point[] {
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgString, "image/svg+xml");
@@ -143,7 +132,7 @@
       });
   }
 
-  // Toggle background visibility
+  // TOGGLE BACKGROUND VISIBILITY
   function toggleBg(hide: boolean) {
     hideBg = hide;
     const osd = viewer.world.getItemAt(0);
