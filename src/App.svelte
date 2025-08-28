@@ -205,9 +205,8 @@
   #viewer {
     width: 100%;
     height: 70vh;
-    border: solid 1px lightgray;
+    border: solid 1px #ddd;
     border-radius: 4px;
-    /* background: rgba(247, 250, 200, 0.5); */
   }
 
   .fragment-controls {
