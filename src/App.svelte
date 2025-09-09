@@ -29,12 +29,8 @@
     ms_label = manifest.label.en[0];
 
     const tileSources = manifest.items.map((canvas) => ({
-      tileSource: {
-        type: "image",
-        url: canvas.items[0].items[0].body.id
-      },
+      tileSource: canvas.items[0].items[0].body.service[0].id + "/info.json",
     }));
-    // const tileSources = manifest.items[22].items[0].items[0].body.service[0].id + "/info.json"
 
     viewer = OpenSeadragon({
       id: "viewer",
@@ -53,16 +49,15 @@
     // RESET STATES
     transformableFrags = [];
     canvas_label = "";
-    // hideBg = false 
     
-    const frag0_id = viewer.world.getItemAt(0)?.source.url;
+    const frag0_id = viewer.world.getItemAt(0)?.source["@id"];
     const canvas = manifest.items.find((c) =>
-      c.items[0].items[0].body.id === frag0_id,
+      c.items[0].items[0].body.id.includes(frag0_id),
     );
     canvas_label = canvas?.label.none[0] as string;
     
     const otherFrags = canvas?.items[0].items.filter(
-      (f) => f.body.id !== frag0_id,
+      (f) => !f.body.id.includes(frag0_id),
     );
     if (!otherFrags) return;
 
@@ -139,7 +134,7 @@
     if (!osd) return;
 
     if (hide) {
-      const frag0_id = osd.source.url;
+      const frag0_id = osd.source["@id"];
       const canvas = manifest.items.find((c) =>
         c.items[0].items[0].body.id.includes(frag0_id),
       );
